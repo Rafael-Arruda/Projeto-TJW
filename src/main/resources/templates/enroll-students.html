@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<title>Matricular alunos</title>
+	<div th:replace="~{fragments/head}"></div>
+</head>
+
+<body>
+	<div th:replace="~{fragments/sidebar}"></div>
+
+	<div th:replace="~{fragments/header}"></div>
+
+	<div class="container">
+		<div class="row mt-4">
+			<div class="col-md-8">
+				<h2>Matricular alunos</h2>
+			</div>
+			<div class="col-md-4 text-right">
+				<a href="/turmas" class="btn btn-secondary">
+					<i class="fas fa-arrow-left"></i> Voltar
+				</a>
+			</div>
+		</div>
+		<div class="card-container">
+			<div class="form-group">
+				<label for="email" class="form-label">E-mail:</label>
+				<input type="email" id="email" name="email" class="form-control" required>
+			</div>
+			<div class="text-right">
+				<button type="button" class="btn btn-primary" onclick="adicionarAluno()">Adicionar</button>
+			</div>
+		</div>
+		<div class="card-container">
+			<table class="table table-striped">
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>Nome</th>
+						<th>Email</th>
+						<th>Ações</th>
+					</tr>
+				</thead>
+				<tbody id="students-table-body">
+				</tbody>
+			</table>
+			<div class="text-right">
+				<button type="submit" class="btn btn-success" onclick="submitAlunos()">Salvar</button>
+			</div>
+		</div>
+	</div>
+
+	<div th:replace="~{fragments/scripts}"></div>
+
+	<script>
+		const students = []
+
+		document.addEventListener('DOMContentLoaded', function () {
+			fetch(`/classes/[[${classe.id}]]`)
+				.then(response => {
+					if (!response.ok) {
+						throw new Error('Erro ao obter os alunos matriculados.')
+					}
+					return response.json()
+				})
+				.then(data => {
+					students.push(...data.students)
+					atualizarTabelaAlunos()
+				})
+				.catch(error => {
+					console.error(error)
+				})
+		})
+
+		function adicionarAluno() {
+			const emailInput = document.getElementById('email')
+			const email = emailInput.value.trim()
+
+			if (email === '') {
+				alert('Por favor, insira um email válido.')
+				return
+			}
+
+			// Verifica se o aluno já foi adicionado
+			if (students.find((student) => student.email === email)) {
+				alert('Este aluno já foi adicionado.')
+				return
+			}
+
+			fetch(`/students/first?email=${email}`)
+				.then(response => {
+					if (!response.ok) {
+						throw new Error('Email não encontrado.')
+					}
+					return response.json()
+				})
+				.then(data => {
+					const student = {
+						id: data.id,
+						name: data.name,
+						email: data.email,
+					}
+					students.push(student)
+
+					// Limpa o input de email
+					emailInput.value = ''
+
+					// Atualiza a tabela de alunos adicionados
+					atualizarTabelaAlunos()
+				})
+				.catch(error => {
+					alert(error.message)
+				})
+		}
+
+		function removerAluno(id) {
+			const index = students.findIndex((student) => student.id === id)
+			if (index !== -1) {
+				students.splice(index, 1)
+				atualizarTabelaAlunos()
+			}
+		}
+
+		function atualizarTabelaAlunos() {
+			const tabelaBody = document.getElementById('students-table-body')
+			tabelaBody.innerHTML = ''
+
+			students.forEach((student) => {
+				const row = document.createElement('tr')
+
+				const idCell = document.createElement('td')
+				idCell.textContent = student.id
+				row.appendChild(idCell)
+
+				const nameCell = document.createElement('td')
+				nameCell.textContent = student.name
+				row.appendChild(nameCell)
+
+				const emailCell = document.createElement('td')
+				emailCell.textContent = student.email
+				row.appendChild(emailCell)
+
+				const acoesCell = document.createElement('td')
+				const removerBtn = document.createElement('button')
+				removerBtn.classList.add('btn', 'btn-danger')
+				removerBtn.innerHTML = '<i class="fas fa-trash"></i>'
+				removerBtn.addEventListener('click', () => removerAluno(student.id))
+				acoesCell.appendChild(removerBtn)
+				row.appendChild(acoesCell)
+
+				tabelaBody.appendChild(row)
+			})
+		}
+
+		function submitAlunos() {
+			fetch(`/classes/students/[[${classe.id}]]`, {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(students)
+			})
+				.then(response => {
+					if (response.ok) {
+						return response.json()
+					} else {
+						throw new Error('Erro ao enviar alunos matriculados.')
+					}
+					alert('Alunos matriculados com sucesso!')
+				})
+				.then(data => {
+					if (data.redirect) {
+						window.location.href = data.redirect
+					}
+				})
+				.catch(error => {
+					alert(error.message)
+				})
+		}
+	</script>
+</body>
+
+</html>

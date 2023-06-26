@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<title>Turmas</title>
+	<div th:replace="~{fragments/head}"></div>
+</head>
+
+<body>
+	<div th:replace="~{fragments/sidebar}"></div>
+
+	<div th:replace="~{fragments/header}"></div>
+
+	<div class="container">
+		<div class="row mt-4 table-title">
+			<div class="col-md-8">
+				<h2>Classes</h2>
+			</div>
+		</div>
+		<div class="card-container">
+			<div>
+				<div class="input-group">
+					<input type="text" id="searchInput" class="form-control" placeholder="Buscar pelo nome..."
+						oninput="handleSearchInput()">
+				</div>
+			</div>
+			<table class="table mt-4">
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>Nome</th>
+						<th>Professor</th>
+						<th>Ações</th>
+					</tr>
+				</thead>
+				<tbody>
+				</tbody>
+			</table>
+		</div>
+		<div class="row mt-4">
+			<div class="col-md-4 text-right">
+				<a href="/alunos/cadastrar" class="btn btn-success">
+					Novo Registro
+				</a>
+			</div>
+		</div>
+	</div>
+
+	<div th:replace="~{fragments/scripts}"></div>
+	<script>
+		fetch('/classes')
+			.then(response => response.json())
+			.then(data => {
+				data.forEach(classe => {
+					const row = document.createElement('tr')
+					row.innerHTML = `
+                        <td>${classe.id}</td>
+                        <td>${classe.name}</td>
+						<td>${classe.professor.name}</td>
+						<td>
+							<a href="/turmas/${classe.id}" class="btn btn-sm btn-primary">
+								Editar
+							</a>
+							<a href="/turmas/matricula/${classe.id}" class="btn btn-sm btn-success">
+								Matricular
+							</a>
+							<a href="#" class="btn btn-sm btn-danger" onclick="deleteStudent(${classe.id})">
+								Apagar
+							</a>
+						</td>
+                    `
+					document.querySelector('tbody').appendChild(row)
+				})
+			})
+			.catch(error => {
+				console.error('Ocorreu um erro ao obter os dados das turmas:', error)
+			})
+
+		function deleteStudent(id) {
+			if (confirm('Deseja realmente excluir esta turma?')) {
+				fetch(`/classes/${id}`, {
+					method: 'DELETE'
+				})
+					.then(response => {
+						if (response.ok) {
+							location.reload()
+						} else {
+							console.error('Ocorreu um erro ao excluir a turma.')
+						}
+					})
+					.catch(error => {
+						console.error('Ocorreu um erro ao excluir a turma:', error)
+					})
+			}
+		}
+
+		let searchTimeout
+
+		function handleSearchInput() {
+			clearTimeout(searchTimeout)
+			searchTimeout = setTimeout(searchStudents, 1000) // Tempo de espera de 1000ms (1s)
+		}
+
+		function searchStudents() {
+			const searchInput = document.getElementById('searchInput')
+			const searchTerm = searchInput.value
+
+			fetch(`/classes/search?email=${searchTerm}`)
+				.then(response => response.json())
+				.then(data => {
+					// Limpar a tabela existente
+					const tbody = document.querySelector('tbody')
+					tbody.innerHTML = ''
+
+					data.forEach(classe => {
+						const row = document.createElement('tr')
+						row.innerHTML = `
+										<td>${classe.id}</td>
+										<td>${classe.name}</td>
+										<td>${classe.professor.name}</td>
+										<td>
+											<a href="/turmas/${classe.id}" class="btn btn-sm btn-primary">
+												Editar
+											</a>
+											<a href="/turmas/matricula/${classe.id}" class="btn btn-sm btn-success">
+												Matricular
+											</a>
+											<a href="#" class="btn btn-sm btn-danger" onclick="deleteStudent(${classe.id})">
+												Apagar
+											</a>
+										</td>
+									`
+						tbody.appendChild(row)
+					})
+				})
+				.catch(error => {
+					console.error('Ocorreu um erro ao obter os dados das turmas:', error)
+				})
+		}
+	</script>
+</body>
+
+</html>

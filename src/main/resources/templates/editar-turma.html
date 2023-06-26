@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<title>Editar turma</title>
+	<div th:replace="~{fragments/head}"></div>
+</head>
+
+<body>
+	<div th:replace="~{fragments/sidebar}"></div>
+
+	<div th:replace="~{fragments/header}"></div>
+
+	<div class="container">
+		<div class="row mt-4">
+			<div class="col-md-8">
+				<h2>Editar turma</h2>
+			</div>
+			<div class="col-md-4 text-right">
+				<a href="/turmas" class="btn btn-secondary">
+					<i class="fas fa-arrow-left"></i> Voltar
+				</a>
+			</div>
+		</div>
+		<div class="card-container">
+			<form th:action="@{/classes/{id}(id=${classe.id})}" th:object="${classe}" th:method="put">
+				<div class="form-group">
+					<label for="name" class="form-label">Nome:</label>
+					<input type="text" id="name" name="name" class="form-control" required th:field="*{name}">
+				</div>
+				<div class="form-group">
+					<label for="professor" class="form-label">Professor:</label>
+					<select id="professor" name="professor" class="form-control" required th:field="*{professor.id}">
+						<option value="">Selecione um professor</option>
+						<option th:each="professor : ${professors}" th:value="${professor.id}"
+							th:text="${professor.name}"></option>
+					</select>
+				</div>
+				<div class="text-right">
+					<a href="/turmas" class="btn btn-secondary">
+						Cancelar
+					</a>
+					<button type="submit" class="btn btn-primary">Salvar</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<div th:replace="~{fragments/scripts}"></div>
+</body>
+
+</html>

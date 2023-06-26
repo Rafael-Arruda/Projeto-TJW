@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<title>Classes do aluno</title>
+	<div th:replace="~{fragments/head}"></div>
+</head>
+
+<body>
+	<div th:replace="~{fragments/sidebar}"></div>
+
+	<div th:replace="~{fragments/header}"></div>
+
+	<div class="container">
+		<div class="row mt-4">
+			<div class="col-md-8">
+				<h2>Classes do aluno <span th:text="${student.name}"></span></h2>
+			</div>
+			<div class="col-md-4 text-right">
+				<a href="/alunos" class="btn btn-secondary">
+					<i class="fas fa-arrow-left"></i> Voltar
+				</a>
+			</div>
+		</div>
+		<div class="card-container">
+			<table class="table mt-4">
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>Nome</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="classe : ${student.classes}">
+						<td th:text="${classe.id}"></td>
+						<td th:text="${classe.name}"></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<div th:replace="~{fragments/scripts}"></div>
+</body>
+
+</html>

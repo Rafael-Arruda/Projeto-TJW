@@ -1,0 +1,20 @@
+<div th:fragment="sidebar" class="sidebar">
+	<h2 class="sidebar-title">Menu</h2>
+	<hr>
+	<a class="nav-link" th:classappend="${currentPage == 'home' ? 'active' : ''}" href="/">
+		<i class="fas fa-home"></i>
+		<span>Início</span>
+	</a>
+	<a class="nav-link" th:classappend="${currentPage == 'alunos' ? 'active' : ''}" href="/alunos">
+		<i class="fas fa-user-graduate"></i>
+		<span>Estudantes</span>
+	</a>
+	<a class="nav-link" th:classappend="${currentPage == 'professores' ? 'active' : ''}" href="/professores">
+		<i class="fas fa-chalkboard-teacher"></i>
+		<span>Professores</span>
+	</a>
+	<a class="nav-link" th:classappend="${currentPage == 'turmas' ? 'active' : ''}" href="/turmas">
+		<i class="fas fa-users"></i>
+		<span>Classes</span>
+	</a>
+</div>
